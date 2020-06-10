@@ -1,6 +1,6 @@
 <template>
   <div class="user">
-    <BreadCrumb class="BreadCrumb" />
+    <BreadCrumb class="BreadCrumb" :levels="['首页', '用户管理', '用户列表']" />
     <el-card class="box-card" shadow="hover">
       <!-- 搜索框 -->
       <el-row :gutter="20">
@@ -14,57 +14,58 @@
         </el-col>
       </el-row>
       <!-- 内容区 -->
-      <el-row>
-        <el-table :data="userList" style="width: 100%" stripe border>
-          <el-table-column type="index" :index="index"></el-table-column>
-          <el-table-column prop="username" label="姓名"></el-table-column>
-          <el-table-column prop="email" label="邮箱"></el-table-column>
-          <el-table-column prop="mobile" label="电话"></el-table-column>
-          <el-table-column prop="role_name" label="角色"></el-table-column>
-          <el-table-column label="状态">
-            <el-switch
-              v-model="scope.row.ms_status"
-              slot-scope="scope"
-              @change="userStatusChange(scope.row)"
-            ></el-switch>
-          </el-table-column>
-          <el-table-column label="操作" width="180px">
-            <template slot-scope="scope">
-              <el-tooltip effect="dark" content="修改信息" placement="top" :enterable="false">
-                <el-button
-                  type="primary"
-                  icon="el-icon-edit"
-                  size="mini"
-                  @click="showEditForm(scope.row.id)"
-                ></el-button>
-              </el-tooltip>
-              <el-tooltip effect="dark" content="删除用户" placement="top" :enterable="false">
-                <el-button
-                  type="danger"
-                  icon="el-icon-delete"
-                  size="mini"
-                  @click="deleteUser(scope.row.id)"
-                ></el-button>
-              </el-tooltip>
-              <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-                <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
-              </el-tooltip>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-row>
+      <el-table :data="userList" style="width: 100%" stripe border>
+        <el-table-column type="index" :index="index"></el-table-column>
+        <el-table-column prop="username" label="姓名"></el-table-column>
+        <el-table-column prop="email" label="邮箱"></el-table-column>
+        <el-table-column prop="mobile" label="电话"></el-table-column>
+        <el-table-column prop="role_name" label="角色"></el-table-column>
+        <el-table-column label="状态">
+          <el-switch
+            v-model="scope.row.ms_status"
+            slot-scope="scope"
+            @change="userStatusChange(scope.row)"
+          ></el-switch>
+        </el-table-column>
+        <el-table-column label="操作" width="180px">
+          <template slot-scope="scope">
+            <el-tooltip effect="dark" content="修改信息" placement="top" :enterable="false">
+              <el-button
+                type="primary"
+                icon="el-icon-edit"
+                size="mini"
+                @click="showEditForm(scope.row.id)"
+              ></el-button>
+            </el-tooltip>
+            <el-tooltip effect="dark" content="删除用户" placement="top" :enterable="false">
+              <el-button
+                type="danger"
+                icon="el-icon-delete"
+                size="mini"
+                @click="deleteUser(scope.row.id)"
+              ></el-button>
+            </el-tooltip>
+            <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
+              <el-button
+                type="warning"
+                icon="el-icon-setting"
+                size="mini"
+                @click="showRoleDialog(scope.row)"
+              ></el-button>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+      </el-table>
       <!-- 分页 -->
-      <el-row>
-        <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="queryInfo.pagenum"
-          :page-sizes="[1, 2, 5, 10]"
-          :page-size="queryInfo.pagesize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-        ></el-pagination>
-      </el-row>
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="queryInfo.pagenum"
+        :page-sizes="[1, 2, 5, 10]"
+        :page-size="queryInfo.pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+      ></el-pagination>
 
       <el-dialog title="添加用户" :visible.sync="isShowAddDialog" width="50%">
         <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
@@ -104,6 +105,28 @@
           <el-button type="primary" @click="editUser">确 定</el-button>
         </span>
       </el-dialog>
+
+      <el-dialog title="分配角色" :visible.sync="isShowRoleDialog" width="50%">
+        <div>
+          <p>当前用户: {{user.username}}</p>
+          <p>当前角色: {{user.role_name}}</p>
+          <p>
+            请选择角色:
+            <el-select v-model="selectedRoleId" placeholder="请选择">
+              <el-option
+                v-for="role in roleList"
+                :key="role.id"
+                :label="role.roleName"
+                :value="role.id"
+              ></el-option>
+            </el-select>
+          </p>
+        </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="cancelRole">取 消</el-button>
+          <el-button type="primary" @click="assignRole">确 定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -140,7 +163,11 @@ export default {
         pagenum: 1,
         pagesize: 10
       },
+      selectedRoleId:'',
+      user: {},
+      isShowRoleDialog: false,
       userList: [],
+      roleList:[],
       total: 0,
       isShowAddDialog: false,
       isShowEditDialog: false,
@@ -175,9 +202,9 @@ export default {
       }
     };
   },
-  computed:{
-    index(){
-      return (this.queryInfo.pagenum - 1) * this.queryInfo.pagesize + 1
+  computed: {
+    index() {
+      return (this.queryInfo.pagenum - 1) * this.queryInfo.pagesize + 1;
     }
   },
   methods: {
@@ -272,7 +299,7 @@ export default {
       })
         .then(async () => {
           const res = await this.rquest_deleteUser({
-            id:id
+            id: id
           });
           console.log(res);
           if (res.meta.status == 200) {
@@ -281,7 +308,6 @@ export default {
           } else {
             this.$message.error(res.meta.msg);
           }
-          
         })
         .catch(() => {
           this.$message({
@@ -289,6 +315,32 @@ export default {
             message: "已取消删除"
           });
         });
+    },
+    async showRoleDialog(user) {
+      this.user = user;
+      this.isShowRoleDialog = true;
+      const res = await this.rquest_getRoleList();
+      if(res.meta.status != 200){
+        this.$message.error(res.meta.msg);
+      }
+      this.roleList = res.data;
+    },
+    cancelRole() {
+       this.isShowRoleDialog = false;
+    },
+    async assignRole() {
+      const res = await this.rquest_assignRole({
+        id:this.user.id,
+        rid:this.selectedRoleId
+      });
+      if(res.meta.status != 200){
+        this.$message.error(res.meta.msg);
+      }else{
+        this.$message.success('分配成功');
+        this.getUserList();
+      }
+      this.cancelRole();
+
     }
   }
 };
@@ -296,10 +348,6 @@ export default {
 
 <style lang="less" scoped>
 .user {
-  .BreadCrumb {
-    margin-bottom: 10px;
-  }
-
   .el-container {
     background-color: #fff;
   }

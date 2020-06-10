@@ -38,7 +38,15 @@ Vue.prototype.rquest_editUser = (data)=>{
     return Axios.put("users/" + data.id, data);
 }
 
-//编辑用户提交
+//删除用户提交
 Vue.prototype.rquest_deleteUser = (data)=>{
     return Axios.delete("users/" + data.id);
 }
+
+//分配用户角色
+Vue.prototype.rquest_assignRole = (data)=>{
+    return Axios.put(`users/${data.id}/role`,{
+        rid:data.rid
+    });
+}
+
