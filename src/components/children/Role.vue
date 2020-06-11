@@ -93,12 +93,12 @@
         show-checkbox
       ></el-tree>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelAuth">取 消</el-button>
+        <el-button @click="isShowAuthDialog = false">取 消</el-button>
         <el-button type="primary" @click="assignRights">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 添加角色窗口-->
-    <el-dialog title="添加角色" :visible.sync="isShowAddDialog" width="50%">
+    <el-dialog title="添加角色" :visible.sync="isShowAddDialog" width="50%" @close="addDialogClose">
       <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="80px">
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="addForm.roleName "></el-input>
@@ -108,11 +108,11 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelAdd">取 消</el-button>
+        <el-button @click="isShowAddDialog = false">取 消</el-button>
         <el-button type="primary" @click="addRole">确 定</el-button>
       </span>
     </el-dialog>
-
+    <!-- 编辑角色 -->
     <el-dialog title="编辑角色" :visible.sync="isShowEditDialog" width="50%">
       <el-form :model="editForm" :rules="addFormRules" ref="editFormRef" label-width="80px">
         <el-form-item label="角色名称" prop="roleName">
@@ -123,7 +123,7 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelEdit">取 消</el-button>
+        <el-button @click="isShowEditDialog = false">取 消</el-button>
         <el-button type="primary" @click="editRole">确 定</el-button>
       </span>
     </el-dialog>
@@ -225,9 +225,6 @@ export default {
       this.getCheckedKeys(role, this.checkedKeys);
       this.roleId = role.id;
     },
-    cancelAuth() {
-      this.isShowAuthDialog = false;
-    },
     async assignRights() {
       const res = await this.rquest_getAssignRights({
         roleId: this.roleId,
@@ -255,8 +252,7 @@ export default {
     showAddDialog() {
       this.isShowAddDialog = true;
     },
-    cancelAdd() {
-      this.isShowAddDialog = false;
+    addDialogClose() {
       this.$refs.addFormRef.resetFields();
     },
     addRole() {
@@ -270,13 +266,12 @@ export default {
             this.$message.success("添加成功");
             this.getRoleList();
           }
-          this.cancelAdd();
+          this.isShowAddDialog = false;
         } else {
           this.$message.error("请填写必要信息");
         }
       });
     },
-
     showEditDialog(roleId) {
       this.isShowEditDialog = true;
       this.getRole(roleId);
@@ -290,9 +285,6 @@ export default {
       }
       this.editForm = res.data;
     },
-    cancelEdit() {
-      this.isShowEditDialog = false;
-    },
     editRole() {
       this.$refs.editFormRef.validate(async valid => {
         if (valid) {
@@ -303,7 +295,7 @@ export default {
             this.$message.success('修改成功');
             this.getRoleList(); 
           }
-          this.cancelEdit();
+          this.isShowEditDialog = false;
         } else {
           this.$message.error("请填写必要信息");
         }

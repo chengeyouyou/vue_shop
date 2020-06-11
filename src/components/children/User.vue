@@ -66,68 +66,68 @@
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
       ></el-pagination>
-
-      <el-dialog title="添加用户" :visible.sync="isShowAddDialog" width="50%">
-        <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="addForm.username "></el-input>
-          </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input v-model="addForm.password"></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-model="addForm.email"></el-input>
-          </el-form-item>
-          <el-form-item label="手机号" prop="mobile">
-            <el-input v-model="addForm.mobile"></el-input>
-          </el-form-item>
-        </el-form>
-        <span slot="footer" class="dialog-footer">
-          <el-button @click="cancelAdd">取 消</el-button>
-          <el-button type="primary" @click="addUser">确 定</el-button>
-        </span>
-      </el-dialog>
-
-      <el-dialog title="编辑用户" :visible.sync="isShowEditDialog" width="50%">
-        <el-form :model="editForm" :rules="addFormRules" ref="editFormRef" label-width="70px">
-          <el-form-item label="用户名">
-            <el-input v-model="editForm.username" disabled></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-model="editForm.email"></el-input>
-          </el-form-item>
-          <el-form-item label="手机号" prop="mobile">
-            <el-input v-model="editForm.mobile"></el-input>
-          </el-form-item>
-        </el-form>
-        <span slot="footer" class="dialog-footer">
-          <el-button @click="cancelEdit">取 消</el-button>
-          <el-button type="primary" @click="editUser">确 定</el-button>
-        </span>
-      </el-dialog>
-
-      <el-dialog title="分配角色" :visible.sync="isShowRoleDialog" width="50%">
-        <div>
-          <p>当前用户: {{user.username}}</p>
-          <p>当前角色: {{user.role_name}}</p>
-          <p>
-            请选择角色:
-            <el-select v-model="selectedRoleId" placeholder="请选择">
-              <el-option
-                v-for="role in roleList"
-                :key="role.id"
-                :label="role.roleName"
-                :value="role.id"
-              ></el-option>
-            </el-select>
-          </p>
-        </div>
-        <span slot="footer" class="dialog-footer">
-          <el-button @click="cancelRole">取 消</el-button>
-          <el-button type="primary" @click="assignRole">确 定</el-button>
-        </span>
-      </el-dialog>
     </el-card>
+
+    <el-dialog title="添加用户" :visible.sync="isShowAddDialog" width="50%" @close="addDialogClose">
+      <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username "></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="addForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShowAddDialog=false">取 消</el-button>
+        <el-button type="primary" @click="addUser">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog title="编辑用户" :visible.sync="isShowEditDialog" width="50%" @close="editDialogClose">
+      <el-form :model="editForm" :rules="addFormRules" ref="editFormRef" label-width="70px">
+        <el-form-item label="用户名">
+          <el-input v-model="editForm.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="editForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="editForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShowEditDialog = false">取 消</el-button>
+        <el-button type="primary" @click="editUser">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog title="分配角色" :visible.sync="isShowRoleDialog" width="50%" @close="roleDialogClose">
+      <div>
+        <p>当前用户: {{user.username}}</p>
+        <p>当前角色: {{user.role_name}}</p>
+        <p>
+          请选择角色:
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option
+              v-for="role in roleList"
+              :key="role.id"
+              :label="role.roleName"
+              :value="role.id"
+            ></el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShowRoleDialog = false">取 消</el-button>
+        <el-button type="primary" @click="assignRole">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -163,11 +163,11 @@ export default {
         pagenum: 1,
         pagesize: 10
       },
-      selectedRoleId:'',
+      selectedRoleId: "",
       user: {},
       isShowRoleDialog: false,
       userList: [],
-      roleList:[],
+      roleList: [],
       total: 0,
       isShowAddDialog: false,
       isShowEditDialog: false,
@@ -241,8 +241,7 @@ export default {
     showAddDialog() {
       this.isShowAddDialog = true;
     },
-    cancelAdd() {
-      this.isShowAddDialog = false;
+    addDialogClose() {
       this.$refs.addFormRef.resetFields();
     },
     addUser() {
@@ -271,8 +270,7 @@ export default {
         this.$message.error(res.meta.msg);
       }
     },
-    cancelEdit() {
-      this.isShowEditDialog = false;
+    editDialogClose() {
       this.$refs.editFormRef.resetFields();
     },
     editUser() {
@@ -320,28 +318,30 @@ export default {
       this.user = user;
       this.isShowRoleDialog = true;
       const res = await this.rquest_getRoleList();
-      if(res.meta.status != 200){
+      if (res.meta.status != 200) {
         this.$message.error(res.meta.msg);
       }
       this.roleList = res.data;
     },
-    cancelRole() {
-       this.isShowRoleDialog = false;
+    roleDialogClose() {
+      this.selectedRoleId = '';
     },
     async assignRole() {
+      if(!this.selectedRoleId){
+        return this.$message.error('请选择角色');
+      }
       const res = await this.rquest_assignRole({
-        id:this.user.id,
-        rid:this.selectedRoleId
+        id: this.user.id,
+        rid: this.selectedRoleId
       });
-      if(res.meta.status != 200){
+      if (res.meta.status != 200) {
         this.$message.error(res.meta.msg);
-      }else{
-        this.$message.success('分配成功');
+      } else {
+        this.$message.success("分配成功");
         this.getUserList();
       }
-      this.cancelRole();
-
-    }
+      this.isShowRoleDialog = false;
+    },
   }
 };
 </script>
@@ -354,5 +354,9 @@ export default {
   .el-row {
     margin-bottom: 10px;
   }
+}
+
+.el-pagination{
+  margin-top:10px
 }
 </style>
