@@ -16,3 +16,4 @@ import './user.js';
 import './rights.js';
 import './role.js';
 import './goods_cate.js';
+import './goods_params.js';

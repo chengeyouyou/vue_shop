@@ -213,7 +213,7 @@ export default {
       this.addCateInfo.cat_level = this.checkedKeys.length;
     },
     deleteCate(cat_id) {
-      this.$confirm("是否删除分类?", "提示", {
+      this.$confirm("是否删除分类?", "删除分类", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
