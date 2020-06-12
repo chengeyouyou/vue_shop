@@ -202,8 +202,7 @@ export default {
 
         this.$set;
         this.manyParamsList.forEach(el => {
-          el.attr_vals =
-            el.attr_vals.length != 0 ? el.attr_vals.split(",") : [];
+          el.attr_vals = el.attr_vals.length != 0 ? el.attr_vals.split(",") : [];
           this.$set(el, "checked", [...el.attr_vals]);
         });
       }
@@ -247,7 +246,7 @@ export default {
           this.manyParamsList.forEach(el => {
             form.attrs.push({
               attr_id: el.attr_id,
-              attr_value: el.attr_vals.join(",")
+              attr_value: el.checked.join(",")
             });
           });
           this.onlyParamsList.forEach(el => {

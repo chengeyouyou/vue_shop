@@ -11,27 +11,28 @@
             clearable
             @clear="clear"
           >
-            <el-button @click="getGoodsList" slot="append" icon="el-icon-search"></el-button>
+            <el-button @click="getOrderList" slot="append" icon="el-icon-search"></el-button>
           </el-input>
-        </el-col>
-        <el-col :span="6">
-          <el-button type="primary" @click="add">添加商品</el-button>
         </el-col>
       </el-row>
 
-      <el-table :data="goodsList" border stripe>
+      <el-table :data="orderList" border stripe>
         <el-table-column type="index" :index="index"></el-table-column>
-        <el-table-column label="商品名称" prop="goods_name" width="500px"></el-table-column>
-        <el-table-column label="商品价格(元)" prop="goods_price" width="110px"></el-table-column>
-        <el-table-column label="商品重量" prop="goods_weight" width="100px"></el-table-column>
-        <el-table-column label="创建时间" prop="add_time">
-          <template slot-scope="scope">{{scope.row.add_time | date_format}}</template>
+        <el-table-column label="订单编号" prop="order_number" width="400px"></el-table-column>
+        <el-table-column label="订单价格(元)" prop="order_price" width="110px"></el-table-column>
+        <el-table-column label="是否付款" prop="pay_status" width="100px">
+          <template slot-scope="scope">
+            <el-tag type="danger" v-if="scope.row.pay_status != 1">未付款</el-tag>
+            <el-tag type="success" v-else>已付款</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="是否发货" prop="is_send" width="90px"></el-table-column>
+        <el-table-column label="创建时间" prop="create_time">
+          <template slot-scope="scope">{{scope.row.create_time | date_format}}</template>
         </el-table-column>
         <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog"></el-button>
-          <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteGoods(scope.row.goods_id)"></el-button>
-          </template>
+          <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog"></el-button>
+          <el-button type="success" icon="el-icon-location" size="mini" @click="showProgressDialog"></el-button>
         </el-table-column>
       </el-table>
 
@@ -46,19 +47,46 @@
       ></el-pagination>
     </el-card>
 
-    <el-dialog title="编辑商品" :visible.sync="isShowEditDialog" width="50%" @close="editDialogClose">
-      
+    <el-dialog title="编辑订单" :visible.sync="isShowEditDialog" width="50%" @close="editDialogClose">
+      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="100px">
+        <el-form-item label="省市区/县" prop="city">
+          <el-cascader
+            v-model="editForm.city"
+            :options="cities"
+            clearable
+            :props="{ expandTrigger: 'hover' }"
+          ></el-cascader>
+        </el-form-item>
+        <el-form-item label="详细地址" prop="address">
+          <el-input v-model="editForm.address"></el-input>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="isShowEditDialog = false">取 消</el-button>
-        <el-button type="primary" @click="editGoods">确 定</el-button>
+        <el-button type="primary" @click="editOrder">确 定</el-button>
       </span>
+    </el-dialog>
+    <el-dialog
+      title="物流信息"
+      :visible.sync="isShowProgressDialog"
+      width="50%"
+      @close="progressDialogClose"
+    >
+      <el-timeline :reverse="false">
+        <el-timeline-item
+          v-for="(activity, index) in wuLiu"
+          :key="index"
+          :timestamp="activity.time"
+        >{{activity.context}}</el-timeline-item>
+      </el-timeline>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import BreadCrumb from "./BreadCrumb.vue";
-import {format} from 'common/utils.js';
+import { format } from "common/utils.js";
+import { cities } from "common/cityData";
 
 export default {
   components: {
@@ -71,87 +99,84 @@ export default {
         pagenum: 1,
         pagesize: 5
       },
-      goodsList: [],
-      total:0,
-      isShowEditDialog:false
+      orderList: [],
+      total: 0,
+      cities,
+      isShowEditDialog: false,
+      editForm: {
+        city: [],
+        address: ""
+      },
+      editFormRules: {
+        city: [{ required: true, message: "请选择省市区", trigger: "blur" }],
+        address: [
+          { required: true, message: "请输入详细地址", trigger: "blur" }
+        ]
+      },
+      isShowProgressDialog: false,
+      wuLiu: []
     };
   },
   created() {
-    this.getGoodsList();
-    
+    this.getOrderList();
   },
-  computed:{
-    index(){
-      return this.queryInfo.pagesize * (this.queryInfo.pagenum - 1) + 1
+  computed: {
+    index() {
+      return this.queryInfo.pagesize * (this.queryInfo.pagenum - 1) + 1;
     }
   },
   methods: {
-    async getGoodsList() {
-      const res = await this.rquest_getGoodsList(this.queryInfo);
+    async getOrderList() {
+      const res = await this.rquest_getOrderList(this.queryInfo);
       console.log(res);
-      if(res.meta.status != 200){
+      if (res.meta.status != 200) {
         return this.$message.error(res.meta.msg);
       }
-      this.goodsList = res.data.goods;
+      this.orderList = res.data.goods;
       this.total = res.data.total;
     },
-    handleSizeChange(val){
+    handleSizeChange(val) {
       this.queryInfo.pagesize = val;
-      this.getGoodsList();
+      this.getOrderList();
     },
-    handleCurrentChange(val){
+    handleCurrentChange(val) {
       this.queryInfo.pagenum = val;
-      this.getGoodsList();
+      this.getOrderList();
     },
-    clear(){
-      this.getGoodsList();
+    clear() {
+      this.getOrderList();
     },
-    deleteGoods(goods_id){
-      this.$confirm("此操作将删除该商品, 是否继续?", "删除商品", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(async res=>{
-          if(res){
-          const result = await this.rquest_deleteGoods({
-              goods_id:goods_id
-            })
-            console.log(result);
-            if(result.meta.status != 200){
-              return this.$message.error(result.meta.msg);
-            }
-            this.getGoodsList();
-            this.$message.success('删除成功');
-          }
-      }).catch(err=>{
-        this.$message.info('已取消删除');
-      });
-    },
-    showEditDialog(){
+    showEditDialog() {
       this.isShowEditDialog = true;
     },
-    add(){
-      this.$router.push({
-        name:'add'
-      });
+    editOrder() {
+      this.isShowEditDialog = false;
     },
-    editGoods(){
-
+    editDialogClose() {
+      this.$refs.editFormRef.resetFields();
+      this.editForm.city = [];
     },
-    editDialogClose(){
-      
-    }
+    async showProgressDialog() {
+      this.isShowProgressDialog = true;
+      const res = await this.rquest_getWuLiu();
+      if (res.meta.status != 200) {
+        return this.$message.error(res.meta.msg);
+      }
+      this.wuLiu = res.data;
+    },
+    progressDialogClose(){}
   },
-  filters:{
-    date_format(date){
-      return format(date * 1000, 'yyyy-MM-dd hh:mm:ss');
+  filters: {
+    date_format(date) {
+      return format(date * 1000, "yyyy-MM-dd hh:mm:ss");
     }
   }
 };
 </script>
 
 <style lang="less" scoped>
-.el-table,.el-row {
+.el-table,
+.el-row {
   margin-bottom: 10px;
 }
 </style>

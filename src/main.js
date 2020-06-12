@@ -5,10 +5,12 @@ import store from './store'
 import './plugins/element.js'
 import 'network/'
 import ZkTable from 'vue-table-with-tree-grid'
+import ECharts from 'vue-echarts'
 
 Vue.config.productionTip = false
 
 Vue.component('tree-table', ZkTable)
+// Vue.component('v-chart', ECharts)
 
 new Vue({
   router,

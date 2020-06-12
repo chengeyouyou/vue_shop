@@ -9,5 +9,9 @@ module.exports = {
                 components: "@/components",
             }
         }
-    }
+    },
+    transpileDependencies: [
+        'vue-echarts',
+        'resize-detector'
+    ]
 }
