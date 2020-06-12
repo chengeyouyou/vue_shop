@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <script>
+        function deep(target) {
+            let dist = null;
+            if (typeof target == 'object') {
+                dist = Array.isArray(target) ? [] : {};
+            } else {
+                return target;
+            }
+            for (const key in target) {
+                if (target.hasOwnProperty(key)) {
+                    const el = target[key];
+                    if (el != null && typeof (el) == 'object') {
+                        dist[key] = deep(el)
+                    } else {
+                        dist[key] = el;
+                    }
+                }
+            }
+            return dist;
+        }
+        let obj = {
+            a: 1,
+            b: [4, 5]
+        }
+        let copy = deep(obj);
+        console.log(copy);
+        obj.a = 10;
+        obj.b.push(10);
+        console.log(copy);
+    </script>
+</body>
+
+</html>

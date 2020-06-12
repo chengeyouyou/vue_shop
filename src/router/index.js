@@ -14,6 +14,7 @@ const Param = () => import('components/children/Param.vue');
 const Category = () => import('components/children/Category.vue');
 const Order = () => import('components/children/Order.vue');
 const Report = () => import('components/children/Report.vue');
+const Add = () => import('components/children/Add.vue');
 
 const routes = [
   {
@@ -77,6 +78,11 @@ const routes = [
         name: "report",
         path: '/reports',
         component: Report
+      },
+      {
+        name: "add",
+        path: '/add',
+        component: Add
       },
     ],
     beforeEnter(to, from, next) {
