@@ -5,12 +5,15 @@ import store from './store'
 import './plugins/element.js'
 import 'network/'
 import ZkTable from 'vue-table-with-tree-grid'
-import ECharts from 'vue-echarts'
+import VeLine from 'v-charts/lib/line.common'
+import 'echarts/lib/component/title';
 
 Vue.config.productionTip = false
 
 Vue.component('tree-table', ZkTable)
-// Vue.component('v-chart', ECharts)
+Vue.component('VeLine', VeLine)
+
+
 
 new Vue({
   router,
